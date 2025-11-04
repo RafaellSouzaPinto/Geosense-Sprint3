@@ -1,5 +1,5 @@
-# Use uma imagem base do OpenJDK 17
-FROM openjdk:17-jdk-slim
+# Use uma imagem base do Eclipse Temurin (sucessor oficial do OpenJDK)
+FROM eclipse-temurin:17-jdk-jammy
 
 # Define o diretório de trabalho
 WORKDIR /app
