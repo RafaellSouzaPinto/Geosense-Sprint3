@@ -1,95 +1,92 @@
 package geosense.Geosense.validation;
 
+import geosense.Geosense.service.ValidacaoOracleService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.util.regex.Pattern;
-
+/**
+ * EmailValidator que usa a função Oracle FN_VALIDAR_SENHA_E_LIMITES
+ * para validação completa de email
+ */
 public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
     
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-        "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
-    );
-    
-    private static final Pattern DOMINIOS_TEMPORARIOS = Pattern.compile(
-        "(?i).*(10minutemail|guerrillamail|mailinator|tempmail|yopmail|throwaway|trash|fake).*"
-    );
-    
     private boolean required;
-    
+    private ValidacaoOracleService validacaoOracleService;
+
     @Override
     public void initialize(ValidEmail constraintAnnotation) {
         this.required = constraintAnnotation.required();
+        try {
+            this.validacaoOracleService = SpringContextHelper.getBean(ValidacaoOracleService.class);
+        } catch (Exception e) {
+            this.validacaoOracleService = null;
+        }
     }
-    
+
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        // Se não é obrigatório e está vazio, é válido
         if (!required && (value == null || value.trim().isEmpty())) {
             return true;
         }
-        
-        // Se é obrigatório e está vazio, é inválido
+
         if (required && (value == null || value.trim().isEmpty())) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Email é obrigatório")
                    .addConstraintViolation();
             return false;
         }
-        
-        String email = value.trim().toLowerCase();
-        
-        // Verifica o tamanho
-        if (email.length() > 254) {
+
+        if (validacaoOracleService != null) {
+            try {
+                ValidacaoOracleService.ResultadoValidacao resultado = 
+                    validacaoOracleService.validarSenhaELimites(
+                        "", // senha vazia para validação só de email
+                        value, 
+                        "MECANICO", 
+                        "VALIDACAO"
+                    );
+
+                if (!resultado.isValid()) {
+                    context.disableDefaultConstraintViolation();
+                    String erros = resultado.getErros();
+                    if (erros != null && !erros.isEmpty()) {
+                        String[] errosArray = erros.split(";");
+                        for (String erro : errosArray) {
+                            String erroLower = erro.trim().toLowerCase();
+                            if (erroLower.contains("email") ||
+                                erroLower.contains("formato") ||
+                                erroLower.contains("válido") ||
+                                erroLower.contains("dominio")) {
+                                context.buildConstraintViolationWithTemplate(erro.trim())
+                                       .addConstraintViolation();
+                                return false;
+                            }
+                        }
+                    }
+                    context.buildConstraintViolationWithTemplate("Email inválido")
+                           .addConstraintViolation();
+                    return false;
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao validar email com Oracle: " + e.getMessage());
+            }
+        }
+
+        String email = value.trim();
+        if (email.length() > 255) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Email muito longo (máximo 254 caracteres)")
+            context.buildConstraintViolationWithTemplate("Email deve ter no máximo 255 caracteres")
                    .addConstraintViolation();
             return false;
         }
-        
-        // Verifica formato básico
-        if (!EMAIL_PATTERN.matcher(email).matches()) {
+
+        if (!email.contains("@") || !email.contains(".")) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Formato de email inválido")
+            context.buildConstraintViolationWithTemplate("Email deve ter formato válido (exemplo@dominio.com)")
                    .addConstraintViolation();
             return false;
         }
-        
-        // Verifica se não é domínio temporário
-        if (DOMINIOS_TEMPORARIOS.matcher(email).matches()) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Emails temporários não são permitidos")
-                   .addConstraintViolation();
-            return false;
-        }
-        
-        // Verifica se a parte local não é muito longa
-        String[] parts = email.split("@");
-        if (parts.length == 2) {
-            if (parts[0].length() > 64) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("Parte local do email muito longa (máximo 64 caracteres)")
-                       .addConstraintViolation();
-                return false;
-            }
-            
-            // Verifica se não começa ou termina com ponto
-            if (parts[0].startsWith(".") || parts[0].endsWith(".")) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("Email não pode começar ou terminar com ponto")
-                       .addConstraintViolation();
-                return false;
-            }
-            
-            // Verifica se não tem pontos consecutivos
-            if (parts[0].contains("..")) {
-                context.disableDefaultConstraintViolation();
-                context.buildConstraintViolationWithTemplate("Email não pode ter pontos consecutivos")
-                       .addConstraintViolation();
-                return false;
-            }
-        }
-        
+
         return true;
     }
 }

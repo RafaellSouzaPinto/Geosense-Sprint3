@@ -248,14 +248,22 @@
         background: rgba(239, 68, 68, 0.1);
         border: 1px solid rgba(239, 68, 68, 0.3);
         color: #fca5a5;
-        padding: 10px 14px;
+        padding: 12px 16px;
         border-radius: 8px;
         font-size: 13px;
         margin-top: 8px;
+        margin-bottom: 20px;
         backdrop-filter: blur(5px);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        font-weight: 500;
+      }
+
+      .error-msg i {
+        font-size: 16px;
+        color: #f87171;
+        flex-shrink: 0;
       }
 
       .success-msg {
@@ -387,13 +395,9 @@
                 th:field="*{nome}"
                 type="text"
                 placeholder="Insira seu nome completo"
-                required
               />
             </div>
-            <div class="error-msg" th:if="${#fields.hasErrors('nome')}">
-              <i class="fas fa-exclamation-circle"></i>
-              <span th:errors="*{nome}"></span>
-            </div>
+            <!-- Erros de nome não aparecem mais aqui, vão no erro global -->
           </div>
 
           <div class="field">
@@ -403,15 +407,11 @@
               <input
                 id="email"
                 th:field="*{email}"
-                type="email"
+                type="text"
                 placeholder="Insira seu email"
-                required
               />
             </div>
-            <div class="error-msg" th:if="${#fields.hasErrors('email')}">
-              <i class="fas fa-exclamation-circle"></i>
-              <span th:errors="*{email}"></span>
-            </div>
+            <!-- Erros de email não aparecem mais aqui, vão no erro global -->
           </div>
 
           <div class="field">
@@ -423,21 +423,16 @@
                 th:field="*{senha}"
                 type="password"
                 placeholder="Mínimo 6 caracteres"
-                minlength="6"
-                required
               />
             </div>
-            <div class="error-msg" th:if="${#fields.hasErrors('senha')}">
-              <i class="fas fa-exclamation-circle"></i>
-              <span th:errors="*{senha}"></span>
-            </div>
+            <!-- Erros de senha não aparecem mais aqui, vão no erro global -->
           </div>
 
           <button type="submit" class="register-btn">
             <i class="fas fa-user-plus"></i> Cadastrar
           </button>
 
-          <!-- General Error Message -->
+          <!-- General Error Message - Aparece apenas aqui, após o botão -->
           <div class="error-msg" th:if="${error}">
             <i class="fas fa-exclamation-triangle"></i>
             <span th:text="${error}"></span>

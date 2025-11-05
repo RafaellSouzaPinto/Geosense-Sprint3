@@ -32,6 +32,16 @@ public class AuthController {
 	                            RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("usuario", usuario);
+			StringBuilder erros = new StringBuilder();
+			bindingResult.getAllErrors().forEach(error -> {
+				if (erros.length() > 0) {
+					erros.append(" ");
+				}
+				erros.append(error.getDefaultMessage());
+			});
+			if (erros.length() > 0) {
+				model.addAttribute("error", erros.toString());
+			}
 			return "register";
 		}
 		try {

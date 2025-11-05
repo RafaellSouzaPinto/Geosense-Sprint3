@@ -21,10 +21,12 @@ public class UsuarioService {
 
     private final UsuarioRepository repo;
     private final PasswordEncoder passwordEncoder;
+    private final ValidacaoOracleService validacaoOracleService;
 
-    public UsuarioService(UsuarioRepository repo, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository repo, PasswordEncoder passwordEncoder, ValidacaoOracleService validacaoOracleService) {
         this.repo = repo;
         this.passwordEncoder = passwordEncoder;
+        this.validacaoOracleService = validacaoOracleService;
     }
 
     public ResponseEntity<String> login(CredentialsDTO cred) {
@@ -61,8 +63,19 @@ public class UsuarioService {
                     new IllegalArgumentException("Administrador já existe. Use o login."));
         }
 
-        if (repo.existsByEmail(dto.getEmail())) {
-            throw new IllegalArgumentException("E-mail já cadastrado.");
+        String tipoUsuario = TipoUsuario.MECANICO.name();
+        ValidacaoOracleService.ResultadoValidacao resultado = 
+            validacaoOracleService.validarSenhaELimites(
+                dto.getSenha(), 
+                dto.getEmail(), 
+                tipoUsuario, 
+                "INSERT"
+            );
+
+        if (!resultado.isValid()) {
+            throw new IllegalArgumentException(resultado.getErros() != null && !resultado.getErros().isEmpty() 
+                ? resultado.getErros() 
+                : resultado.getMensagem());
         }
 
         Usuario u = new Usuario();
@@ -80,6 +93,22 @@ public class UsuarioService {
     public ResponseEntity<?> update(Long id, UsuarioDTO dto) {
         return repo.findById(id)
                 .map(u -> {
+                    String tipoUsuario = u.getTipo().name();
+                    ValidacaoOracleService.ResultadoValidacao resultado = 
+                        validacaoOracleService.validarSenhaELimites(
+                            dto.getSenha(), 
+                            dto.getEmail(), 
+                            tipoUsuario, 
+                            "VALIDACAO"
+                        );
+
+                    if (!resultado.isValid()) {
+                        return ResponseEntity.badRequest()
+                            .body(resultado.getErros() != null && !resultado.getErros().isEmpty() 
+                                ? resultado.getErros() 
+                                : resultado.getMensagem());
+                    }
+                    
                     u.setNome(dto.getNome());
                     u.setEmail(dto.getEmail());
                     u.setSenha(passwordEncoder.encode(dto.getSenha()));

@@ -4,7 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import geosense.Geosense.validation.ValidEmail;
 import geosense.Geosense.validation.ValidSenha;
+import geosense.Geosense.validation.ValidUsuario;
 
+@ValidUsuario
 public record UsuarioDTO(
         @NotBlank(message = "Nome é obrigatório")
         @Size(max = 100, message = "Nome deve ter até 100 caracteres")
@@ -14,12 +16,12 @@ public record UsuarioDTO(
         String email,
 
         @ValidSenha(
-            minLength = 8,
-            maxLength = 128,
+            minLength = 6,
+            maxLength = 20,
             requireUppercase = true,
             requireLowercase = true,
             requireDigit = true,
-            requireSpecialChar = true,
+            requireSpecialChar = false,
             required = true
         )
         String senha

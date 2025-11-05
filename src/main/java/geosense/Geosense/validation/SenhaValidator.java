@@ -1,19 +1,10 @@
 package geosense.Geosense.validation;
 
+import geosense.Geosense.service.ValidacaoOracleService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-import java.util.regex.Pattern;
-
 public class SenhaValidator implements ConstraintValidator<ValidSenha, String> {
-    
-    private static final Pattern SENHAS_COMUNS = Pattern.compile(
-        "(?i).*(123456|password|senha|admin|qwerty|letmein|welcome|monkey|dragon|master|abc123|123123|password123|senha123|12345678|1234567890|00000000|11111111).*"
-    );
-    
-    private static final Pattern SEQUENCIAS = Pattern.compile(
-        ".*(012|123|234|345|456|567|678|789|890|987|876|765|654|543|432|321|210|abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz|zyx|yxw|xwv|wvu|vut|uts|tsr|srq|rqp|qpo|pon|onm|nml|mlk|lkj|kji|jih|ihg|hgf|gfe|fed|edc|dcb|cba).*"
-    );
     
     private int minLength;
     private int maxLength;
@@ -22,6 +13,7 @@ public class SenhaValidator implements ConstraintValidator<ValidSenha, String> {
     private boolean requireDigit;
     private boolean requireSpecialChar;
     private boolean required;
+    private ValidacaoOracleService validacaoOracleService;
     
     @Override
     public void initialize(ValidSenha constraintAnnotation) {
@@ -32,6 +24,12 @@ public class SenhaValidator implements ConstraintValidator<ValidSenha, String> {
         this.requireDigit = constraintAnnotation.requireDigit();
         this.requireSpecialChar = constraintAnnotation.requireSpecialChar();
         this.required = constraintAnnotation.required();
+        
+        try {
+            this.validacaoOracleService = SpringContextHelper.getBean(ValidacaoOracleService.class);
+        } catch (Exception e) {
+            this.validacaoOracleService = null;
+        }
     }
     
     @Override
@@ -46,75 +44,86 @@ public class SenhaValidator implements ConstraintValidator<ValidSenha, String> {
                    .addConstraintViolation();
             return false;
         }
+
+        if (validacaoOracleService != null) {
+            try {
+                ValidacaoOracleService.ResultadoValidacao resultado = 
+                    validacaoOracleService.validarSenhaELimites(
+                        value,
+                        "", // email vazio para validação só de senha
+                        "MECANICO", 
+                        "VALIDACAO"
+                    );
+
+                if (!resultado.isValid()) {
+                    context.disableDefaultConstraintViolation();
+                    String erros = resultado.getErros();
+                    if (erros != null && !erros.isEmpty()) {
+                        String[] errosArray = erros.split(";");
+                        for (String erro : errosArray) {
+                            String erroLower = erro.trim().toLowerCase();
+                            if (erroLower.contains("senha") ||
+                                erroLower.contains("caracteres") ||
+                                erroLower.contains("número") ||
+                                erroLower.contains("maiúscula") ||
+                                erroLower.contains("minúscula") ||
+                                erroLower.contains("espaços")) {
+                                context.buildConstraintViolationWithTemplate(erro.trim())
+                                       .addConstraintViolation();
+                                return false;
+                            }
+                        }
+                    }
+                    context.buildConstraintViolationWithTemplate("Senha inválida")
+                           .addConstraintViolation();
+                    return false;
+                }
+            } catch (Exception e) {
+                System.err.println("Erro ao validar senha com Oracle: " + e.getMessage());
+            }
+        }
+
+        int minOracle = 6;
+        int maxOracle = 20;
         
-        // Verifica o tamanho mínimo
-        if (value.length() < minLength) {
+        if (value.length() < minOracle) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha deve ter pelo menos " + minLength + " caracteres")
+            context.buildConstraintViolationWithTemplate("Senha deve ter pelo menos " + minOracle + " caracteres")
                    .addConstraintViolation();
             return false;
         }
         
-        // Verifica o tamanho máximo
-        if (value.length() > maxLength) {
+        if (value.length() > maxOracle) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha deve ter no máximo " + maxLength + " caracteres")
+            context.buildConstraintViolationWithTemplate("Senha deve ter no máximo " + maxOracle + " caracteres")
                    .addConstraintViolation();
             return false;
         }
-        
-        // Verifica se não é uma senha comum
-        if (SENHAS_COMUNS.matcher(value).matches()) {
+
+        if (value.contains(" ")) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha muito comum, escolha uma senha mais segura")
+            context.buildConstraintViolationWithTemplate("Senha não pode conter espaços")
                    .addConstraintViolation();
             return false;
         }
-        
-        // Verifica se não contém sequências
-        if (SEQUENCIAS.matcher(value.toLowerCase()).matches()) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha não pode conter sequências de caracteres")
-                   .addConstraintViolation();
-            return false;
-        }
-        
-        // Verifica se tem letra maiúscula
-        if (requireUppercase && !value.matches(".*[A-Z].*")) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha deve conter pelo menos uma letra maiúscula")
-                   .addConstraintViolation();
-            return false;
-        }
-        
-        // Verifica se tem letra minúscula
-        if (requireLowercase && !value.matches(".*[a-z].*")) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha deve conter pelo menos uma letra minúscula")
-                   .addConstraintViolation();
-            return false;
-        }
-        
-        // Verifica se tem dígito
-        if (requireDigit && !value.matches(".*[0-9].*")) {
+
+        if (!value.matches(".*[0-9].*")) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate("Senha deve conter pelo menos um número")
                    .addConstraintViolation();
             return false;
         }
-        
-        // Verifica se tem caractere especial
-        if (requireSpecialChar && !value.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?].*")) {
+
+        if (!value.matches(".*[A-Z].*")) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha deve conter pelo menos um caractere especial (!@#$%^&*()_+-=[]{}|;':\"\\\\,.<>/?)")
+            context.buildConstraintViolationWithTemplate("Senha deve conter pelo menos uma letra maiúscula")
                    .addConstraintViolation();
             return false;
         }
-        
-        // Verifica se não tem mais de 3 caracteres iguais consecutivos
-        if (value.matches(".*(.)\\1{3,}.*")) {
+
+        if (!value.matches(".*[a-z].*")) {
             context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate("Senha não pode ter mais de 3 caracteres iguais consecutivos")
+            context.buildConstraintViolationWithTemplate("Senha deve conter pelo menos uma letra minúscula")
                    .addConstraintViolation();
             return false;
         }

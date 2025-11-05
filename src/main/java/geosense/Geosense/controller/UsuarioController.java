@@ -6,6 +6,7 @@ import geosense.Geosense.dto.UsuarioComDependenciasDTO;
 import geosense.Geosense.entity.TipoUsuario;
 import geosense.Geosense.entity.Usuario;
 import geosense.Geosense.repository.UsuarioRepository;
+import geosense.Geosense.service.ValidacaoOracleService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -24,10 +25,12 @@ public class UsuarioController {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ValidacaoOracleService validacaoOracleService;
 
-    public UsuarioController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioController(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder, ValidacaoOracleService validacaoOracleService) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.validacaoOracleService = validacaoOracleService;
     }
 
     @GetMapping
@@ -62,8 +65,43 @@ public class UsuarioController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("usuario", dto);
             model.addAttribute("tipos", TipoUsuario.values());
+            StringBuilder erros = new StringBuilder();
+            bindingResult.getAllErrors().forEach(error -> {
+                if (erros.length() > 0) {
+                    erros.append(" ");
+                }
+                erros.append(error.getDefaultMessage());
+            });
+            if (erros.length() > 0) {
+                model.addAttribute("error", erros.toString());
+            }
             return "usuarios/form";
         }
+        
+        try {
+            ValidacaoOracleService.ResultadoValidacao resultado = 
+                validacaoOracleService.validarSenhaELimites(
+                    dto.getSenha(), 
+                    dto.getEmail(), 
+                    tipo.name(), 
+                    "INSERT"
+                );
+
+            if (!resultado.isValid()) {
+                model.addAttribute("usuario", dto);
+                model.addAttribute("tipos", TipoUsuario.values());
+                model.addAttribute("error", resultado.getErros() != null && !resultado.getErros().isEmpty() 
+                    ? resultado.getErros() 
+                    : resultado.getMensagem());
+                return "usuarios/form";
+            }
+        } catch (Exception e) {
+            model.addAttribute("usuario", dto);
+            model.addAttribute("tipos", TipoUsuario.values());
+            model.addAttribute("error", "Erro ao validar dados: " + e.getMessage());
+            return "usuarios/form";
+        }
+        
         Usuario u = new Usuario();
         u.setNome(dto.getNome());
         u.setEmail(dto.getEmail());
@@ -77,7 +115,6 @@ public class UsuarioController {
     @GetMapping("/{id}/editar")
     public String editForm(@PathVariable Long id, Model model) {
         Usuario u = usuarioRepository.findById(id).orElseThrow();
-        // Usa DTO de edição que não exige senha
         model.addAttribute("usuario", new UsuarioEditDTO(u.getNome(), u.getEmail(), ""));
         model.addAttribute("id", id);
         model.addAttribute("tipoAtual", u.getTipo());

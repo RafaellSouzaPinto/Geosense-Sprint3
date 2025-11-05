@@ -284,17 +284,45 @@
 
       /* Error Messages */
       .error-message {
-        color: var(--error-color);
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        padding: 12px 16px;
+        border-radius: 8px;
         font-size: 13px;
         margin-top: 8px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 10px;
         font-weight: 500;
+        backdrop-filter: blur(5px);
       }
 
       .error-message i {
-        font-size: 12px;
+        font-size: 16px;
+        color: #f87171;
+      }
+
+      /* Alert Error Global - Padronizado */
+      .alert-error {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        color: #fca5a5;
+        padding: 12px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+        backdrop-filter: blur(5px);
+      }
+
+      .alert-error i {
+        font-size: 16px;
+        color: #f87171;
+        flex-shrink: 0;
       }
 
       /* Form Actions */
@@ -534,6 +562,12 @@
           >
         </h2>
 
+        <!-- Global Error Message - Padronizado -->
+        <div class="alert-error" th:if="${error}">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span th:text="${error}"></span>
+        </div>
+
         <form
           th:action="${id} != null ? @{'/usuarios/' + ${id}} : @{/usuarios}"
           th:object="${usuario}"
@@ -552,14 +586,7 @@
               placeholder="Digite o nome completo do usuário"
               required
             />
-            <div
-              class="error-message"
-              th:if="${#fields.hasErrors('nome')}"
-              th:errors="*{nome}"
-            >
-              <i class="fas fa-exclamation-circle"></i>
-              <span th:errors="*{nome}"></span>
-            </div>
+            <!-- Erros de nome não aparecem mais aqui, vão no erro global -->
           </div>
 
           <div class="form-group">
@@ -570,19 +597,11 @@
             <input
               id="email"
               th:field="*{email}"
-              type="email"
+              type="text"
               class="form-input"
               placeholder="Digite o email do usuário"
-              required
             />
-            <div
-              class="error-message"
-              th:if="${#fields.hasErrors('email')}"
-              th:errors="*{email}"
-            >
-              <i class="fas fa-exclamation-circle"></i>
-              <span th:errors="*{email}"></span>
-            </div>
+            <!-- Erros de email não aparecem mais aqui, vão no erro global -->
           </div>
 
           <div class="form-group password-field">
@@ -606,8 +625,6 @@
               type="password"
               class="form-input"
               placeholder="Digite uma nova senha"
-              th:minlength="${id != null ? 0 : 6}"
-              th:required="${id == null}"
             />
             <button
               type="button"
@@ -616,14 +633,7 @@
             >
               <i class="fas fa-eye" id="toggleIcon"></i>
             </button>
-            <div
-              class="error-message"
-              th:if="${#fields.hasErrors('senha')}"
-              th:errors="*{senha}"
-            >
-              <i class="fas fa-exclamation-circle"></i>
-              <span th:errors="*{senha}"></span>
-            </div>
+            <!-- Erros de senha não aparecem mais aqui, vão no erro global -->
             <div th:if="${id != null}" class="password-hint">
               <i class="fas fa-info-circle"></i>
               <span
