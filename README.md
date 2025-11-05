@@ -888,12 +888,6 @@ Função que valida senha, email e tipo de usuário conforme regras de negócio:
 
 ---
 
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
-
----
-
 <div align="center">
 
 ## 🏆 Desenvolvido pela equipe GeoSense
