@@ -879,15 +879,6 @@ Função que valida senha, email e tipo de usuário conforme regras de negócio:
 
 ---
 
-### Padrões de Código
-
-- **Java**: Seguir convenções do Spring Boot
-- **SQL**: Usar maiúsculas para palavras-chave
-- **Commits**: Mensagens descritivas em português
-- **Testes**: Cobertura mínima de 80%
-
----
-
 <div align="center">
 
 ## 🏆 Desenvolvido pela equipe GeoSense
