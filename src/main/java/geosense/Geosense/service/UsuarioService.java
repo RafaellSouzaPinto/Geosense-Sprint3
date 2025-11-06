@@ -73,9 +73,16 @@ public class UsuarioService {
             );
 
         if (!resultado.isValid()) {
-            throw new IllegalArgumentException(resultado.getErros() != null && !resultado.getErros().isEmpty() 
+            System.out.println("=== USUARIO SERVICE - VALIDAÇÃO FALHOU ===");
+            System.out.println("Erros: " + resultado.getErros());
+            System.out.println("Mensagem: " + resultado.getMensagem());
+            System.out.println("===========================================");
+            
+            String mensagemErro = resultado.getErros() != null && !resultado.getErros().isEmpty() 
                 ? resultado.getErros() 
-                : resultado.getMensagem());
+                : resultado.getMensagem();
+            
+            throw new IllegalArgumentException(mensagemErro);
         }
 
         Usuario u = new Usuario();

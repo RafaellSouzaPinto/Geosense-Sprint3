@@ -36,42 +36,7 @@ public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
             return false;
         }
 
-        if (validacaoOracleService != null) {
-            try {
-                ValidacaoOracleService.ResultadoValidacao resultado = 
-                    validacaoOracleService.validarSenhaELimites(
-                        "", // senha vazia para validação só de email
-                        value, 
-                        "MECANICO", 
-                        "VALIDACAO"
-                    );
-
-                if (!resultado.isValid()) {
-                    context.disableDefaultConstraintViolation();
-                    String erros = resultado.getErros();
-                    if (erros != null && !erros.isEmpty()) {
-                        String[] errosArray = erros.split(";");
-                        for (String erro : errosArray) {
-                            String erroLower = erro.trim().toLowerCase();
-                            if (erroLower.contains("email") ||
-                                erroLower.contains("formato") ||
-                                erroLower.contains("válido") ||
-                                erroLower.contains("dominio")) {
-                                context.buildConstraintViolationWithTemplate(erro.trim())
-                                       .addConstraintViolation();
-                                return false;
-                            }
-                        }
-                    }
-                    context.buildConstraintViolationWithTemplate("Email inválido")
-                           .addConstraintViolation();
-                    return false;
-                }
-            } catch (Exception e) {
-                System.err.println("Erro ao validar email com Oracle: " + e.getMessage());
-            }
-        }
-
+        // Validação básica local primeiro (mais rápida)
         String email = value.trim();
         if (email.length() > 255) {
             context.disableDefaultConstraintViolation();
@@ -86,6 +51,7 @@ public class EmailValidator implements ConstraintValidator<ValidEmail, String> {
                    .addConstraintViolation();
             return false;
         }
+
 
         return true;
     }

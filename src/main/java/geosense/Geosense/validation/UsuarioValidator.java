@@ -31,13 +31,15 @@ public class UsuarioValidator implements ConstraintValidator<ValidUsuario, Usuar
 
         try {
             String tipoUsuario = "MECANICO";
-
             String operacao = "VALIDACAO";
+
+            String senha = value.getSenha() != null ? value.getSenha() : "";
+            String email = value.getEmail() != null ? value.getEmail() : "";
 
             ValidacaoOracleService.ResultadoValidacao resultado =
                 validacaoOracleService.validarSenhaELimites(
-                    value.getSenha() != null ? value.getSenha() : "", 
-                    value.getEmail() != null ? value.getEmail() : "", 
+                    senha, 
+                    email, 
                     tipoUsuario, 
                     operacao
                 );
@@ -45,12 +47,21 @@ public class UsuarioValidator implements ConstraintValidator<ValidUsuario, Usuar
             if (!resultado.isValid()) {
                 context.disableDefaultConstraintViolation();
                 
+                System.out.println("=== USUARIO VALIDATOR - ERRO DETECTADO ===");
+                System.out.println("Status: " + resultado.getStatus());
+                System.out.println("Mensagem: " + resultado.getMensagem());
+                System.out.println("Total Erros: " + resultado.getTotalErros());
+                System.out.println("Erros: " + resultado.getErros());
+                
                 if (resultado.getErros() != null && !resultado.getErros().isEmpty()) {
                     String[] erros = resultado.getErros().split(";");
+                    System.out.println("Erros separados: " + java.util.Arrays.toString(erros));
+                    
                     for (String erro : erros) {
                         if (erro.trim().isEmpty()) continue;
                         
                         String erroLower = erro.trim().toLowerCase();
+                        System.out.println("Processando erro: " + erro.trim());
                         
                         if (erroLower.contains("senha") ||
                             erroLower.contains("caracteres") ||
@@ -58,6 +69,7 @@ public class UsuarioValidator implements ConstraintValidator<ValidUsuario, Usuar
                             erroLower.contains("maiúscula") ||
                             erroLower.contains("minúscula") ||
                             erroLower.contains("espaços")) {
+                            System.out.println("  -> Adicionando como erro de SENHA");
                             context.buildConstraintViolationWithTemplate(erro.trim())
                                    .addPropertyNode("senha")
                                    .addConstraintViolation();
@@ -66,16 +78,19 @@ public class UsuarioValidator implements ConstraintValidator<ValidUsuario, Usuar
                                  erroLower.contains("formato") ||
                                  erroLower.contains("válido") ||
                                  erroLower.contains("dominio")) {
+                            System.out.println("  -> Adicionando como erro de EMAIL");
                             context.buildConstraintViolationWithTemplate(erro.trim())
                                    .addPropertyNode("email")
                                    .addConstraintViolation();
                         } 
                         else {
+                            System.out.println("  -> Adicionando como erro genérico");
                             context.buildConstraintViolationWithTemplate(erro.trim())
                                    .addConstraintViolation();
                         }
                     }
                 } else {
+                    System.out.println("  -> Usando mensagem genérica");
                     context.buildConstraintViolationWithTemplate(resultado.getMensagem())
                            .addConstraintViolation();
                 }

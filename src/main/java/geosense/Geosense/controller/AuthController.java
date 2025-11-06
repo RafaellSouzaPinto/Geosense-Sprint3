@@ -32,13 +32,27 @@ public class AuthController {
 	                            RedirectAttributes redirectAttributes) {
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("usuario", usuario);
+			
+			System.out.println("=== AUTH CONTROLLER - ERROS DE VALIDAÇÃO ===");
+			System.out.println("Total de erros: " + bindingResult.getErrorCount());
+			
 			StringBuilder erros = new StringBuilder();
 			bindingResult.getAllErrors().forEach(error -> {
+				System.out.println("Erro: " + error.getDefaultMessage());
+				System.out.println("  Campo: " + (error instanceof org.springframework.validation.FieldError 
+					? ((org.springframework.validation.FieldError) error).getField() : "global"));
 				if (erros.length() > 0) {
 					erros.append(" ");
 				}
-				erros.append(error.getDefaultMessage());
+				String mensagem = error.getDefaultMessage();
+				if (!erros.toString().contains(mensagem)) {
+					erros.append(mensagem);
+				}
 			});
+			
+			System.out.println("Mensagem final de erro: " + erros.toString());
+			System.out.println("=============================================");
+			
 			if (erros.length() > 0) {
 				model.addAttribute("error", erros.toString());
 			}

@@ -45,43 +45,6 @@ public class SenhaValidator implements ConstraintValidator<ValidSenha, String> {
             return false;
         }
 
-        if (validacaoOracleService != null) {
-            try {
-                ValidacaoOracleService.ResultadoValidacao resultado = 
-                    validacaoOracleService.validarSenhaELimites(
-                        value,
-                        "", // email vazio para validação só de senha
-                        "MECANICO", 
-                        "VALIDACAO"
-                    );
-
-                if (!resultado.isValid()) {
-                    context.disableDefaultConstraintViolation();
-                    String erros = resultado.getErros();
-                    if (erros != null && !erros.isEmpty()) {
-                        String[] errosArray = erros.split(";");
-                        for (String erro : errosArray) {
-                            String erroLower = erro.trim().toLowerCase();
-                            if (erroLower.contains("senha") ||
-                                erroLower.contains("caracteres") ||
-                                erroLower.contains("número") ||
-                                erroLower.contains("maiúscula") ||
-                                erroLower.contains("minúscula") ||
-                                erroLower.contains("espaços")) {
-                                context.buildConstraintViolationWithTemplate(erro.trim())
-                                       .addConstraintViolation();
-                                return false;
-                            }
-                        }
-                    }
-                    context.buildConstraintViolationWithTemplate("Senha inválida")
-                           .addConstraintViolation();
-                    return false;
-                }
-            } catch (Exception e) {
-                System.err.println("Erro ao validar senha com Oracle: " + e.getMessage());
-            }
-        }
 
         int minOracle = 6;
         int maxOracle = 20;

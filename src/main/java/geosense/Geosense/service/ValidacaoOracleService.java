@@ -41,17 +41,32 @@ public class ValidacaoOracleService {
             
             String resultadoJson = callableStatement.getString(1);
             
+            // Log para debug
+            System.out.println("=== DEBUG VALIDAÇÃO ORACLE ===");
+            System.out.println("Senha: " + (senha != null ? senha.substring(0, Math.min(3, senha.length())) + "***" : "null"));
+            System.out.println("Email: " + email);
+            System.out.println("Tipo: " + tipoUsuario);
+            System.out.println("Operação: " + operacao);
+            System.out.println("Resultado JSON: " + resultadoJson);
+            System.out.println("==============================");
+            
             return parseResultado(resultadoJson);
             
         } catch (SQLException e) {
+            System.err.println("ERRO SQL ao chamar função Oracle: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Erro ao chamar função de validação Oracle: " + e.getMessage(), e);
         } catch (Exception e) {
+            System.err.println("ERRO ao processar resultado: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Erro ao processar resultado da validação: " + e.getMessage(), e);
         }
     }
 
     private ResultadoValidacao parseResultado(String resultadoJson) {
         try {
+            System.out.println("Parseando JSON: " + resultadoJson);
+            
             JsonNode jsonNode = objectMapper.readTree(resultadoJson);
             
             String status = jsonNode.get("status").asText();
@@ -65,9 +80,18 @@ public class ValidacaoOracleService {
             
             boolean isValid = "VALIDACAO_OK".equals(status);
             
+            System.out.println("Status: " + status);
+            System.out.println("Mensagem: " + mensagem);
+            System.out.println("Total Erros: " + totalErros);
+            System.out.println("Erros: " + erros);
+            System.out.println("IsValid: " + isValid);
+            
             return new ResultadoValidacao(isValid, status, mensagem, totalErros, erros);
             
         } catch (Exception e) {
+            System.err.println("ERRO ao fazer parse do JSON: " + e.getMessage());
+            System.err.println("JSON recebido: " + resultadoJson);
+            e.printStackTrace();
             return new ResultadoValidacao(false, "VALIDACAO_ERRO",
                 "Erro ao processar resultado: " + e.getMessage(), 1, 
                 "Erro ao processar resposta da validação");
