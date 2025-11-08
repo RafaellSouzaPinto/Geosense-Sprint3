@@ -365,7 +365,7 @@ O sistema utiliza a função Oracle `FN_VALIDAR_SENHA_E_LIMITES` para validaçã
   - Máximo 255 caracteres
   - Verificação de duplicidade (na operação INSERT)
 - **Tipo de Usuário**:
-  - Deve ser um dos tipos válidos: MECANICO, ADMINISTRADOR, OPERADOR
+  - Deve ser um dos tipos válidos: MECANICO, ADMINISTRADOR
 
 **Mensagens de erro padronizadas**: Todos os erros de validação são exibidos em formato visual consistente (caixa vermelha com ícone triangular) no frontend.
 
@@ -1110,7 +1110,7 @@ Função que valida senha, email e tipo de usuário conforme regras de negócio:
 
 - `p_senha VARCHAR2` - Senha a ser validada
 - `p_email VARCHAR2` - Email a ser validado
-- `p_tipo_usuario VARCHAR2` - Tipo de usuário (MECANICO, ADMINISTRADOR, OPERADOR)
+- `p_tipo_usuario VARCHAR2` - Tipo de usuário (MECANICO, ADMINISTRADOR)
 - `p_operacao VARCHAR2` - Operação (VALIDACAO ou INSERT)
 
 **Retorno:**

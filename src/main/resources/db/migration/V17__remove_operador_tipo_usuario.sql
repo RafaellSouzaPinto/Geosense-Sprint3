@@ -1,6 +1,9 @@
--- Migration: Criar função FN_VALIDAR_SENHA_E_LIMITES
 
--- Remove a função se já existir (para permitir re-execução da migration)
+UPDATE USUARIO
+SET TIPO = 'MECANICO'
+WHERE TIPO = 'OPERADOR';
+COMMIT;
+
 BEGIN
     EXECUTE IMMEDIATE 'DROP FUNCTION FN_VALIDAR_SENHA_E_LIMITES';
 EXCEPTION
@@ -11,7 +14,6 @@ EXCEPTION
 END;
 /
 
--- Cria a função de validação
 CREATE OR REPLACE FUNCTION FN_VALIDAR_SENHA_E_LIMITES(
     p_senha VARCHAR2,
     p_email VARCHAR2,
@@ -208,5 +210,6 @@ EXCEPTION
 END FN_VALIDAR_SENHA_E_LIMITES;
 /
 
-SELECT 'Função FN_VALIDAR_SENHA_E_LIMITES criada com sucesso!' AS STATUS FROM DUAL;
+SELECT 'Função FN_VALIDAR_SENHA_E_LIMITES atualizada sem o tipo OPERADOR.' AS STATUS FROM DUAL;
+
 

@@ -59,7 +59,7 @@ public class AdminInitializer implements CommandLineRunner {
             Usuario admin = new Usuario();
             admin.setNome(ADMIN_NAME);
             admin.setEmail(ADMIN_EMAIL);
-            admin.setSenha(passwordEncoder.encode(ADMIN_PASSWORD)); // Senha criptografada
+            admin.setSenha(passwordEncoder.encode(ADMIN_PASSWORD));
             admin.setTipo(TipoUsuario.ADMINISTRADOR);
             
             usuarioRepository.save(admin);
