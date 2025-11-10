@@ -64,7 +64,7 @@ class MotoControllerTest {
     void setUp() {
         motoDTOValida = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "ABC1234",
                 "CHASSI123456789",
                 "reparos simples",
@@ -73,7 +73,7 @@ class MotoControllerTest {
 
         motoEntity = new Moto();
         motoEntity.setId(1L);
-        motoEntity.setModelo("Honda CB 600F");
+        motoEntity.setModelo("Mottu E");
         motoEntity.setPlaca("ABC1234");
         motoEntity.setChassi("CHASSI123456789");
         motoEntity.setProblemaIdentificado("reparos simples");
@@ -198,7 +198,7 @@ class MotoControllerTest {
         Long motoId = 1L;
         MotoDTO dtoAtualizado = new MotoDTO(
                 1L,
-                "Honda CB 600F Atualizado",
+                "Mottu Pop",
                 "ABC1234",
                 "CHASSI123456789",
                 "motor defeituoso",
@@ -242,7 +242,7 @@ class MotoControllerTest {
     void deveRejeitarCriacaoQuandoPlacaEChassiVazios() {
         MotoDTO dtoInvalido = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "",
                 "",
                 "reparos simples",
@@ -272,7 +272,7 @@ class MotoControllerTest {
     void deveCriarMotoSemVaga() {
         MotoDTO dtoSemVaga = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu Sport",
                 "ABC1234",
                 null,
                 "reparos simples",

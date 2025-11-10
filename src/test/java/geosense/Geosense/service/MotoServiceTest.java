@@ -13,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.OngoingStubbing;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +43,7 @@ class MotoServiceTest {
     void setUp() {
         motoDTOValida = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "ABC1234",
                 "CHASSI123456789",
                 "reparos simples",
@@ -53,7 +52,7 @@ class MotoServiceTest {
 
         motoEntity = new Moto();
         motoEntity.setId(1L);
-        motoEntity.setModelo("Honda CB 600F");
+        motoEntity.setModelo("Mottu E");
         motoEntity.setPlaca("ABC1234");
         motoEntity.setChassi("CHASSI123456789");
         motoEntity.setProblemaIdentificado("reparos simples");
@@ -72,7 +71,7 @@ class MotoServiceTest {
         MotoDTO resultado = motoService.registrar(motoDTOValida);
 
         assertNotNull(resultado);
-        assertEquals("Honda CB 600F", resultado.getModelo());
+        assertEquals("Mottu E", resultado.getModelo());
         assertEquals("ABC1234", resultado.getPlaca());
         assertEquals("CHASSI123456789", resultado.getChassi());
         assertEquals("reparos simples", resultado.getProblemaIdentificado());
@@ -84,7 +83,7 @@ class MotoServiceTest {
     void deveLancarExcecaoQuandoPlacaEChassiVazios() {
         MotoDTO dtoInvalido = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "",
                 "",
                 "reparos simples",
@@ -104,7 +103,7 @@ class MotoServiceTest {
     void deveRegistrarMotoApenasComPlaca() {
         MotoDTO dtoComPlaca = new MotoDTO(
                 null,
-                "Yamaha MT-07",
+                "Mottu Pop",
                 "XYZ9876",
                 null,
                 null,
@@ -113,7 +112,7 @@ class MotoServiceTest {
 
         Moto motoSalva = new Moto();
         motoSalva.setId(2L);
-        motoSalva.setModelo("Yamaha MT-07");
+        motoSalva.setModelo("Mottu Pop");
         motoSalva.setPlaca("XYZ9876");
         motoSalva.setChassi(null);
 
@@ -122,7 +121,7 @@ class MotoServiceTest {
         MotoDTO resultado = motoService.registrar(dtoComPlaca);
 
         assertNotNull(resultado);
-        assertEquals("Yamaha MT-07", resultado.getModelo());
+        assertEquals("Mottu Pop", resultado.getModelo());
         assertEquals("XYZ9876", resultado.getPlaca());
         assertNull(resultado.getChassi());
         verify(motoRepository, times(1)).save(any(Moto.class));
@@ -133,7 +132,7 @@ class MotoServiceTest {
     void deveRegistrarMotoApenasComChassi() {
         MotoDTO dtoComChassi = new MotoDTO(
                 null,
-                "Kawasaki Ninja",
+                "Mottu Sport",
                 null,
                 "CHASSI987654321",
                 null,
@@ -142,7 +141,7 @@ class MotoServiceTest {
 
         Moto motoSalva = new Moto();
         motoSalva.setId(3L);
-        motoSalva.setModelo("Kawasaki Ninja");
+        motoSalva.setModelo("Mottu Sport");
         motoSalva.setPlaca(null);
         motoSalva.setChassi("CHASSI987654321");
 
@@ -151,7 +150,7 @@ class MotoServiceTest {
         MotoDTO resultado = motoService.registrar(dtoComChassi);
 
         assertNotNull(resultado);
-        assertEquals("Kawasaki Ninja", resultado.getModelo());
+        assertEquals("Mottu Sport", resultado.getModelo());
         assertNull(resultado.getPlaca());
         assertEquals("CHASSI987654321", resultado.getChassi());
         verify(motoRepository, times(1)).save(any(Moto.class));
@@ -162,7 +161,7 @@ class MotoServiceTest {
     void deveLancarExcecaoQuandoProblemaInvalido() {
         MotoDTO dtoComProblemaInvalido = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "ABC1234",
                 null,
                 "problema inexistente",
@@ -182,7 +181,7 @@ class MotoServiceTest {
     void deveRegistrarMotoComVaga() {
         MotoDTO dtoComVaga = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "ABC1234",
                 null,
                 "reparos simples",
@@ -193,7 +192,7 @@ class MotoServiceTest {
 
         Moto motoComVaga = new Moto();
         motoComVaga.setId(1L);
-        motoComVaga.setModelo("Honda CB 600F");
+        motoComVaga.setModelo("Mottu E");
         motoComVaga.setPlaca("ABC1234");
         motoComVaga.setVaga(vagaDisponivel);
 
@@ -212,12 +211,12 @@ class MotoServiceTest {
     void deveListarTodasAsMotos() {
         Moto moto1 = new Moto();
         moto1.setId(1L);
-        moto1.setModelo("Honda CB 600F");
+        moto1.setModelo("Mottu E");
         moto1.setPlaca("ABC1234");
 
         Moto moto2 = new Moto();
         moto2.setId(2L);
-        moto2.setModelo("Yamaha MT-07");
+        moto2.setModelo("Mottu Pop");
         moto2.setPlaca("XYZ9876");
 
         when(motoRepository.findAll()).thenReturn(Arrays.asList(moto1, moto2));
@@ -226,8 +225,8 @@ class MotoServiceTest {
 
         assertNotNull(resultado);
         assertEquals(2, resultado.size());
-        assertEquals("Honda CB 600F", resultado.get(0).getModelo());
-        assertEquals("Yamaha MT-07", resultado.get(1).getModelo());
+        assertEquals("Mottu E", resultado.get(0).getModelo());
+        assertEquals("Mottu Pop", resultado.get(1).getModelo());
         verify(motoRepository, times(1)).findAll();
     }
 
@@ -247,7 +246,7 @@ class MotoServiceTest {
     void deveAceitarProblemaIdentificadoComoNull() {
         MotoDTO dtoSemProblema = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu Sport",
                 "ABC1234",
                 null,
                 null,
@@ -256,7 +255,7 @@ class MotoServiceTest {
 
         Moto motoSalva = new Moto();
         motoSalva.setId(1L);
-        motoSalva.setModelo("Honda CB 600F");
+        motoSalva.setModelo("Mottu Sport");
         motoSalva.setPlaca("ABC1234");
         motoSalva.setProblemaIdentificado(null);
 
@@ -274,7 +273,7 @@ class MotoServiceTest {
     void deveLancarExcecaoQuandoVagaNaoExiste() {
         MotoDTO dtoComVagaInexistente = new MotoDTO(
                 null,
-                "Honda CB 600F",
+                "Mottu E",
                 "ABC1234",
                 null,
                 "reparos simples",

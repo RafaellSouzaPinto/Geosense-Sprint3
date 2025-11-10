@@ -27,12 +27,12 @@ class MotoEntityTest {
     @DisplayName("Caso 1: Deve criar moto válida")
     void deveCriarMotoValida() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu E");
         moto.setPlaca("ABC1234");
         moto.setChassi("CHASSI123456789");
 
         assertNotNull(moto);
-        assertEquals("Honda CB 600F", moto.getModelo());
+        assertEquals("Mottu E", moto.getModelo());
         assertEquals("ABC1234", moto.getPlaca());
         assertEquals("CHASSI123456789", moto.getChassi());
 
@@ -86,7 +86,7 @@ class MotoEntityTest {
     @DisplayName("Caso 5: Deve aceitar placa nula (opcional)")
     void deveAceitarPlacaNula() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu E");
         moto.setPlaca(null);
         moto.setChassi("CHASSI123456789");
 
@@ -101,7 +101,7 @@ class MotoEntityTest {
     @DisplayName("Caso 6: Deve aceitar chassi nulo (opcional)")
     void deveAceitarChassiNulo() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu E");
         moto.setPlaca("ABC1234");
         moto.setChassi(null);
 
@@ -116,7 +116,7 @@ class MotoEntityTest {
     @DisplayName("Caso 7: Deve configurar e recuperar vaga corretamente")
     void deveConfigurarERecuperarVaga() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu E");
         
         Vaga vaga = new Vaga();
         vaga.setId(1L);
@@ -134,7 +134,7 @@ class MotoEntityTest {
     @DisplayName("Caso 8: Deve aceitar problema identificado como null")
     void deveAceitarProblemaIdentificadoNull() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu E");
         moto.setPlaca("ABC1234");
         moto.setProblemaIdentificado(null);
 
@@ -147,7 +147,7 @@ class MotoEntityTest {
     @DisplayName("Caso 9: Deve configurar e recuperar defeitos corretamente")
     void deveConfigurarERecuperarDefeitos() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu E");
 
         Defeito defeito1 = new Defeito();
         defeito1.setId(1L);
@@ -165,7 +165,7 @@ class MotoEntityTest {
     @DisplayName("Caso 10: Deve configurar e recuperar histórico de alocações")
     void deveConfigurarERecuperarHistoricoAlocacoes() {
         Moto moto = new Moto();
-        moto.setModelo("Honda CB 600F");
+        moto.setModelo("Mottu Pop");
 
         AlocacaoMoto alocacao1 = new AlocacaoMoto();
         AlocacaoMoto alocacao2 = new AlocacaoMoto();
@@ -189,7 +189,7 @@ class MotoEntityTest {
 
         Moto moto = new Moto(
                 1L,
-                "Honda CB 600F",
+                "Mottu Sport",
                 "ABC1234",
                 "CHASSI123456789",
                 "reparos simples",
@@ -199,7 +199,7 @@ class MotoEntityTest {
         );
 
         assertEquals(1L, moto.getId());
-        assertEquals("Honda CB 600F", moto.getModelo());
+        assertEquals("Mottu Sport", moto.getModelo());
         assertEquals("ABC1234", moto.getPlaca());
         assertEquals("CHASSI123456789", moto.getChassi());
         assertEquals("reparos simples", moto.getProblemaIdentificado());
